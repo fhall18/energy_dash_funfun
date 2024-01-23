@@ -8,7 +8,6 @@ from datetime import timedelta, datetime as dt
 app = Dash(__name__)
 server = app.server
 
-print(os.getcwd())
 # LOAD DATA
 # df = px.data.gapminder()
 df = pd.read_csv('../data/final_dashboard_df.csv')
@@ -21,7 +20,7 @@ date_data = {'Date': pd.date_range(start='2021-01-01', end = '2021-12-31'),
 date_df = pd.DataFrame(date_data)
 
 # Initialize the Dash app
-app = dash.Dash(__name__)
+# app = dash.Dash(__name__)
 
 # App layout
 # Create marks for the first day of each month
@@ -29,16 +28,22 @@ marks = {i: date.strftime('%Y-%m-%d') for i, date in enumerate(date_df['Date']) 
 
 # App layout
 app.layout = html.Div([
-    dcc.RangeSlider(
-        id='date-slider',
-        marks=marks,
-        min=0,
-        max=len(date_df['Date']) - 1,
-        value=[0, len(date_df['Date']) - 1],
-        step=1,
-        allowCross=False
-    ),
-    dcc.Graph(id='line-chart')
+    html.Div([
+        dcc.RangeSlider(
+            id='date-slider',
+            marks=marks,
+            min=0,
+            max=len(date_df['Date']) - 1,
+            value=[0, len(date_df['Date']) - 1],
+            step=1,
+            allowCross=False
+        ),
+        dcc.Graph(id='line-chart')
+    ]),
+#     html.Div([
+#     dcc.Graph(id='ldc-chart'),
+#     dcc.Graph(id='heat-map')
+# ])
 ])
 
 # Callback to update the chart based on the date slider
@@ -55,8 +60,21 @@ def update_chart(selected_dates):
     fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location', line_group='Location',title='Line Chart with Daily Date Slider')
     return fig
 
+# @app.callback(
+#     Output('line-chart', 'figure'),
+#     [Input('date-slider', 'value')]
+# )
+# def update_chart(selected_dates):
+#     start_date = date_df['Date'].iloc[selected_dates[0]]
+#     end_date = date_df['Date'].iloc[selected_dates[1]]
+#
+#     filtered_df = df[(df['day'] >= start_date) & (df['day'] <= end_date)]
+#
+#     fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location', line_group='Location',title='Line Chart with Daily Date Slider')
+#     return fig
+
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True,port=8071)
 
 # range_slider = dcc.RangeSlider(
 #     value=[1987, 2007],
