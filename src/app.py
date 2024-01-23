@@ -127,11 +127,11 @@ def update_chart(selected_dates):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8071)
-    # app.run_server(debug=True)
+    # app.run_server(debug=True, port=8071)
+    app.run_server(debug=True)
 
 # range_slider = dcc.RangeSlider(
-#     value=[1987, 2007],
+#     value=[1987, 2f007],
 #     step=5,
 #     marks={i: str(i) for i in range(1952, 2012, 5)},
 # )
