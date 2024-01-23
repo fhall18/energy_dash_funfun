@@ -74,7 +74,7 @@ def update_chart(selected_dates):
 #     return fig
 
 if __name__ == "__main__":
-    app.run_server(debug=True,port=8071)
+    app.run_server(debug=True)
 
 # range_slider = dcc.RangeSlider(
 #     value=[1987, 2007],
