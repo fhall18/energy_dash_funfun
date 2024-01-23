@@ -6,7 +6,9 @@ import plotly.express as px
 app = Dash(__name__)
 server = app.server
 
+# LOAD DATA
 df = px.data.gapminder()
+df2 = pd.read_csv('data/final_dashboard_df.csv')
 
 range_slider = dcc.RangeSlider(
     value=[1987, 2007],
