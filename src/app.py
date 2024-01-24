@@ -1,5 +1,6 @@
 import dash
 import pandas as pd
+import numpy as np
 from dash import Dash, dash_table, dcc, html, Input, Output, State
 import plotly.express as px
 import os
@@ -15,13 +16,13 @@ df.day = pd.to_datetime(df.day)
 df.datetime_hourly = pd.to_datetime(df.datetime_hourly)
 
 # fill na w/ mean
-numeric_cols = df.select_dtypes(include='number').columns
-df[numeric_cols] = df.groupby('Location')[numeric_cols].transform(lambda col: col.fillna(col.mean()))
+# numeric_cols = df.select_dtypes(include='number').columns
+# df[numeric_cols] = df.groupby('Location')[numeric_cols].transform(lambda col: col.fillna(col.mean()))
 
 # custom color scale
 color_scale_dash = [
-    (0.0, '#FFB100'),
-    (1.0, '#202850')
+    (0.0, '#FFB100'), # yellow
+    (1.0, '#202850') # blue
 ]
 
 # FORMAT DATES FOR SLIDER
@@ -51,6 +52,7 @@ app.layout = html.Div([
         ),
     ]),
     html.Div([
+        dcc.Graph(id='demand-chart'),
         dcc.Graph(id='ldc-chart'),
     ], style={'display': 'inline-block', 'width': '49%'}),
 
@@ -72,8 +74,10 @@ def update_chart(selected_dates):
 
     filtered_df = df[(df['day'] >= start_date) & (df['day'] <= end_date)]
 
-    fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location', line_group='Location',
-                  title='Line Chart with Daily Date Slider')
+    fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location',
+                  color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
+                  line_group='Location',
+                  title='A Quick Energy Dashboard')
 
     fig.update_layout(height=400)
 
@@ -81,6 +85,7 @@ def update_chart(selected_dates):
 
 
 @app.callback(
+Output('demand-chart', 'figure'),
     Output('ldc-chart', 'figure'),
     Output('vt-heat-map', 'figure'),
     Output('nema-heat-map', 'figure'),
@@ -99,36 +104,42 @@ def update_chart(selected_dates):
         axis=1)
 
     # df for heat-map
-    vt_hm = filtered_df[filtered_df.Location == 'VT'][['day', 'hour', 'energy_cost_pct']]
-    vt_hm = vt_hm.pivot_table(index='hour',columns='day', values='energy_cost_pct', aggfunc='mean')
+    hm1 = filtered_df[filtered_df.Location == 'NEMA'][['day', 'hour', 't_f']]
+    hm1 = hm1.pivot_table(index='hour',columns='day', values='t_f', aggfunc='mean')
 
-    nema_hm = filtered_df[filtered_df.Location == 'NEMA'][['day','hour','energy_cost_pct']]
-    nema_hm = nema_hm.pivot_table(index='hour',columns='day',values='energy_cost_pct', aggfunc='mean')
+    hm2 = filtered_df[filtered_df.Location == 'NEMA'][['day','hour','lmp']]
+    hm2 = hm2.pivot_table(index='hour',columns='day',values='lmp', aggfunc='mean')
 
     # df for ldc
+    vt_ldc = filtered_df[(filtered_df.Location == 'VT') & (filtered_df.energy.notnull())].sort_values('energy',ascending=False).energy.reset_index(drop=True)
+    nema_ldc = filtered_df[(filtered_df.Location == 'NEMA') & (filtered_df.energy.notnull())].sort_values('energy',ascending=False).energy.reset_index(drop=True)
 
-    fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location', line_group='Location',
-                  title='Load Duration Curve')
+    vt_ldc = vt_ldc / max(vt_ldc)
+    nema_ldc = nema_ldc/max(nema_ldc)
 
-    fig_vt = px.imshow(vt_hm, x=vt_hm.columns, y=vt_hm.index, title='Vermont Energy Heat Map', color_continuous_scale=color_scale_dash)
-    fig_nema = px.imshow(nema_hm, x=nema_hm.columns, y=nema_hm.index, title='NEMA Energy Heat Map',color_continuous_scale=color_scale_dash)
+    ldc_index = np.linspace(0,1,len(vt_ldc))
+    ldc = pd.DataFrame(list(zip(ldc_index,vt_ldc,nema_ldc)),columns=['ldc_index','VT','NEMA'])
 
-    # fig_vt = px.imshow(vt_hm, x='day', y='hour',
-    #               title='Vermont Energy Heat Map')
-    # fig_nema = px.imshow(nema_hm, x='day', y='hour',
-    #               title='NEMA Energy Heat Map')
+    # PLOTS
+    fig_dem = px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
+                      color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
+                      title='Demand vs. Temperature')
+    fig_ldc = px.line(ldc,x='ldc_index', y=['VT','NEMA'], color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]}, title='Load Duration Curve')
+    fig_vt = px.imshow(hm1, x=hm1.columns, y=hm1.index, title='Temperature Heat Map')#, color_continuous_scale=color_scale_dash)
+    fig_nema = px.imshow(hm2, x=hm2.columns, y=hm2.index, title='LMP Heat Map')#,color_continuous_scale=color_scale_dash)
 
     # sizing
-    fig.update_layout(height=700)
+    fig_dem.update_layout(height=350)
+    fig_ldc.update_layout(height=350)
     fig_vt.update_layout(height=350)
     fig_nema.update_layout(height=350)
 
-    return fig, fig_vt, fig_nema
+    return fig_dem, fig_ldc, fig_vt, fig_nema
 
 
 if __name__ == "__main__":
-    # app.run_server(debug=True, port=8071)
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8071)
+    # app.run_server(debug=True)
 
 # range_slider = dcc.RangeSlider(
 #     value=[1987, 2f007],
