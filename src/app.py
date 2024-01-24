@@ -3,14 +3,11 @@ import pandas as pd
 import numpy as np
 from dash import Dash, dash_table, dcc, html, Input, Output, State
 import plotly.express as px
-import os
-from datetime import timedelta, datetime as dt
 
 app = Dash(__name__)
 server = app.server
 
 # LOAD DATA
-# df = px.data.gapminder()
 df = pd.read_csv('../data/final_dashboard_df.csv')
 df.day = pd.to_datetime(df.day)
 df.datetime_hourly = pd.to_datetime(df.datetime_hourly)
@@ -30,8 +27,6 @@ date_data = {'Date': pd.date_range(start='2021-01-01', end='2021-12-31'),
              'Value': [i for i in range(365)]}
 date_df = pd.DataFrame(date_data)
 
-# Initialize the Dash app
-# app = dash.Dash(__name__)
 
 # App layout
 # Create marks for the first day of each month
@@ -77,7 +72,10 @@ def update_chart(selected_dates):
     fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location',
                   color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
                   line_group='Location',
-                  title='A Quick Energy Dashboard')
+                  title='A Quick Energy Dashboard').update_layout(
+        xaxis_title = '',
+        yaxis_title = 'Load (MWh)'
+    )
 
     fig.update_layout(height=400)
 
@@ -118,15 +116,28 @@ def update_chart(selected_dates):
     nema_ldc = nema_ldc/max(nema_ldc)
 
     ldc_index = np.linspace(0,1,len(vt_ldc))
-    ldc = pd.DataFrame(list(zip(ldc_index,vt_ldc,nema_ldc)),columns=['ldc_index','VT','NEMA'])
+    ldc = pd.DataFrame(list(zip(ldc_index,vt_ldc,nema_ldc)),columns=['ldc_index', 'VT', 'NEMA'])
 
     # PLOTS
     fig_dem = px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
                       color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
-                      title='Demand vs. Temperature')
-    fig_ldc = px.line(ldc,x='ldc_index', y=['VT','NEMA'], color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]}, title='Load Duration Curve')
-    fig_vt = px.imshow(hm1, x=hm1.columns, y=hm1.index, title='Temperature Heat Map')#, color_continuous_scale=color_scale_dash)
-    fig_nema = px.imshow(hm2, x=hm2.columns, y=hm2.index, title='LMP Heat Map')#,color_continuous_scale=color_scale_dash)
+                      title='Demand vs. Temperature').update_layout(
+        xaxis_title = 'temperature (F)',
+        yaxis_title = 'normalized load'
+    )
+    fig_ldc = px.line(ldc,x='ldc_index', y=['VT','NEMA'],
+                      color_discrete_map={'NEMA': color_scale_dash[1][1],
+                                          'VT': color_scale_dash[0][1]}, title='Load Duration Curve').update_layout(
+        xaxis_title = 'index',
+        yaxis_title = 'percent of peak'
+    )
+    fig_vt = px.imshow(hm1, x=hm1.columns, y=hm1.index,
+                       title='Temperature Heat Map').update_layout(
+        xaxis_title = 'day',
+        yaxis_title = 'hour')
+    fig_nema = px.imshow(hm2, x=hm2.columns, y=hm2.index, title='LMP Heat Map').update_layout(
+        xaxis_title = 'day',
+        yaxis_title = 'hour')
 
     # sizing
     fig_dem.update_layout(height=350)
@@ -138,57 +149,5 @@ def update_chart(selected_dates):
 
 
 if __name__ == "__main__":
-    # app.run_server(debug=True, port=8071)
-    app.run_server(debug=True)
-
-# range_slider = dcc.RangeSlider(
-#     value=[1987, 2f007],
-#     step=5,
-#     marks={i: str(i) for i in range(1952, 2012, 5)},
-# )
-#
-# dtable = dash_table.DataTable(
-#     columns=[{"name": i, "id": i} for i in sorted(df.columns)],
-#     sort_action="native",
-#     page_size=10,
-#     style_table={"overflowX": "auto"},
-# )
-#
-# download_button = html.Button("Download Filtered CSV", style={"marginTop": 20})
-# download_component = dcc.Download()
-#
-# app.layout = html.Div(
-#     [
-#         html.H2("Gapminder Data Download", style={"marginBottom": 20}),
-#         download_component,
-#         range_slider,
-#         download_button,
-#         dtable,
-#     ]
-# )
-#
-#
-# @app.callback(
-#     Output(dtable, "data"),
-#     Input(range_slider, "value"),
-# )
-# def update_table(slider_value):
-#     if not slider_value:
-#         return dash.no_update
-#     dff = df[df.year.between(slider_value[0], slider_value[1])]
-#     return dff.to_dict("records")
-#
-#
-# @app.callback(
-#     Output(download_component, "data"),
-#     Input(download_button, "n_clicks"),
-#     State(dtable, "derived_virtual_data"),
-#     prevent_initial_call=True,
-# )
-# def download_data(n_clicks, data):
-#     dff = pd.DataFrame(data)
-#     return dcc.send_data_frame(dff.to_csv, "filtered_csv.csv")
-#
-
-# if __name__ == "__main__":
-#     app.run_server(debug=True)
+    app.run_server(debug=True, port=8071)
+    # app.run_server(debug=True)

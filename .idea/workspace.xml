@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8bda8029-ccdd-46d8-aec2-903e8b0b9a57" name="Changes" comment="updated">
-      <change afterPath="$PROJECT_DIR$/data/dataset.zip" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/myrender-app2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/myrender-app2.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dash.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Dashboard_DB.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/dataset.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Dashboard_DB.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/EH_Example.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dashboard_etl.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/eda.ipynb" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,6 +69,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/fchall/PyCharm Community Edition 2023.3.2/venv/dashboard",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
 }]]></component>
