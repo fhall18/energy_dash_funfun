@@ -111,8 +111,8 @@ def update_chart(selected_dates):
     hm2 = hm2.pivot_table(index='hour',columns='day',values='lmp', aggfunc='mean')
 
     # df for ldc
-    vt_ldc = filtered_df[(filtered_df.Location == 'VT') & (filtered_df.energy.notnull())].sort_values('energy',ascending=False).energy.reset_index(drop=True)
-    nema_ldc = filtered_df[(filtered_df.Location == 'NEMA') & (filtered_df.energy.notnull())].sort_values('energy',ascending=False).energy.reset_index(drop=True)
+    vt_ldc = filtered_df[(filtered_df.Location == 'VT') & (filtered_df.energy.notnull())].sort_values('energy', ascending=False).energy.reset_index(drop=True)
+    nema_ldc = filtered_df[(filtered_df.Location == 'NEMA') & (filtered_df.energy.notnull())].sort_values('energy', ascending=False).energy.reset_index(drop=True)
 
     vt_ldc = vt_ldc / max(vt_ldc)
     nema_ldc = nema_ldc/max(nema_ldc)
