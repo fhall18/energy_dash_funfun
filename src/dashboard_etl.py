@@ -6,6 +6,7 @@ from datetime import datetime as dt
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+import os
 
 
 ########################################################################################################################
@@ -72,8 +73,6 @@ def clean_file(df, filename):
 
 zip_file_path = './data/dataset.zip'
 
-# Extract the database file from the ZIP archive
-
 # Connect to the SQLite database
 conn = sqlite3.connect('Dashboard_DB.db')
 
@@ -83,12 +82,12 @@ cursor = conn.cursor()
 # Open the ZIP file
 with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
     for f in zip_ref.infolist():
-        if (~f.filename.startswith('__MAC') & f.filename.endswith('csv')):
+        if (~f.filename.startswith('__MAC') & f.filename.endswith('csv')): # only files we want
             csv_file_name = f.filename[30:-4].replace('-', '_')
-            print(csv_file_name)
+            print(csv_file_name,'data/dataset/' + f.filename)
 
-            raw = pd.read_csv('./data/dataset/' + f.filename)  # read file
-            df = clean_file(raw, csv_file_name)
+            raw = pd.read_csv('data/dataset/' + f.filename)  # read file
+            df = clean_file(raw, csv_file_name) # defined function
 
             # Write the DataFrame to the SQLite database
             df.to_sql(csv_file_name.split('.')[0], conn, if_exists='replace', index=False)
@@ -100,6 +99,7 @@ conn.commit()
 cursor.close()
 conn.close()
 
+# CREATE COMPLETE DATATIME RANGE (x2) WITH LOCATIONS
 start_date = dt(2021, 1, 1)
 end_date = dt(2021, 12, 31, 23)  # Include the last hour of the year
 hourly_index = pd.date_range(start=start_date, end=end_date, freq='H')
