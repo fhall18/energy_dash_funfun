@@ -10,6 +10,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/myrender-app2.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/myrender-app2.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dash.ipynb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/dashboard_etl.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/dashboard_etl.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
