@@ -58,31 +58,8 @@ app.layout = html.Div([
 ])
 
 
-# Callback to update the chart based on the date slider
 @app.callback(
-    Output('line-chart', 'figure'),
-    [Input('date-slider', 'value')]
-)
-def update_chart(selected_dates):
-    start_date = date_df['Date'].iloc[selected_dates[0]]
-    end_date = date_df['Date'].iloc[selected_dates[1]]
-
-    filtered_df = df[(df['day'] >= start_date) & (df['day'] <= end_date)]
-
-    fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location',
-                  color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
-                  line_group='Location',
-                  title='A Quick Energy Dashboard').update_layout(
-        xaxis_title = '',
-        yaxis_title = 'Load (MWh)'
-    )
-
-    fig.update_layout(height=400)
-
-    return fig
-
-
-@app.callback(
+Output('line-chart', 'figure'),
 Output('demand-chart', 'figure'),
     Output('ldc-chart', 'figure'),
     Output('vt-heat-map', 'figure'),
@@ -118,9 +95,21 @@ def update_chart(selected_dates):
     ldc_index = np.linspace(0,1,len(vt_ldc))
     ldc = pd.DataFrame(list(zip(ldc_index,vt_ldc,nema_ldc)),columns=['ldc_index', 'VT', 'NEMA'])
 
-    # PLOTS
+    ### PLOTS ###
+    fig = px.line(filtered_df, x='datetime_hourly', y='energy', color='Location',
+                  color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
+                  line_group='Location',
+                  title='A Quick Energy Dashboard').update_layout(
+        xaxis_title = '',
+        yaxis_title = 'Load (MWh)'
+    )
+
+    fig.update_layout(height=400)
+
+
     fig_dem = px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
                       color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
+                      opacity=0.5,
                       title='Demand vs. Temperature').update_layout(
         xaxis_title = 'temperature (F)',
         yaxis_title = 'normalized load'
@@ -145,7 +134,7 @@ def update_chart(selected_dates):
     fig_vt.update_layout(height=350)
     fig_nema.update_layout(height=350)
 
-    return fig_dem, fig_ldc, fig_vt, fig_nema
+    return fig, fig_dem, fig_ldc, fig_vt, fig_nema
 
 
 if __name__ == "__main__":
