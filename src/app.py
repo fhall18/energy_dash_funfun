@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from dash import Dash, dash_table, dcc, html, Input, Output, State
 import plotly.express as px
+from sklearn.linear_model import LinearRegression
 
 app = Dash(__name__)
 server = app.server
@@ -71,6 +72,19 @@ def update_chart(selected_dates):
     end_date = date_df['Date'].iloc[selected_dates[1]]
     filtered_df = df[(df['day'] >= start_date) & (df['day'] <= end_date)]
 
+    # regression
+    def lr(df_input):
+        df_input = df_input[(df_input.t_f.notnull()) & (df_input.energy_normalized.notnull())]
+        mod_fit_ = []
+        for loc in ('VT', 'NEMA'):
+            df_ = df_input[df_input.Location == loc]
+            mod = LinearRegression()
+            mod.fit(df_[['t_f']], df_['energy_normalized'])
+            mod_params = [loc, mod.intercept_, mod.coef_[0]]
+            mod_fit_.append(mod_params)
+
+        return pd.DataFrame(mod_fit_, columns=['name','intercept','slope'])
+
     # Re-Size Heatmap Zone
     vt_sum_lmp_cost = sum(filtered_df[(filtered_df.Location == 'VT') & (filtered_df.total_lmp.notnull())].total_lmp)
     nema_sum_lmp_cost = sum(filtered_df[(filtered_df.Location == 'NEMA') & (filtered_df.total_lmp.notnull())].total_lmp)
@@ -106,14 +120,25 @@ def update_chart(selected_dates):
 
     fig.update_layout(height=400)
 
+    # Temp vs. Normalized Energy
+    model_params = lr(filtered_df)
+    x = np.arange(min(filtered_df.t_f),max(filtered_df.t_f),1)
+    y_vt = model_params.iloc[0,1] + x * model_params.iloc[0,2]
+    y_nema = model_params.iloc[1,1] + x * model_params.iloc[1,2]
+    # regr_df = pd.DataFrame([[x,y_vt,y_nema]],columns=['x','y_vt','y_nema'])
 
-    fig_dem = px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
+    fig_dem = (px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
                       color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
-                      opacity=0.5,
+                      opacity=0.25,
                       title='Demand vs. Temperature').update_layout(
         xaxis_title = 'temperature (F)',
         yaxis_title = 'normalized load'
-    )
+    ).add_scatter(x=x, y=y_vt, mode='lines', name='VT Fit', line=dict(dash='dash', color=color_scale_dash[0][1], width=5))
+                 .add_scatter(x=x, y=y_nema, mode='lines', name='NEMA Fit', line=dict(dash='dash', color=color_scale_dash[1][1],width=5))
+                 .update_traces(marker=dict(size=10), selector=dict(mode='markers'))
+               )
+
+
     fig_ldc = px.line(ldc,x='ldc_index', y=['VT','NEMA'],
                       color_discrete_map={'NEMA': color_scale_dash[1][1],
                                           'VT': color_scale_dash[0][1]}, title='Load Duration Curve').update_layout(
@@ -138,5 +163,5 @@ def update_chart(selected_dates):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8071)
+    app.run_server(debug=True, port=8000)
     # app.run_server(debug=True)
