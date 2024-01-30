@@ -125,7 +125,8 @@ def update_chart(selected_dates):
     x = np.arange(min(filtered_df.t_f),max(filtered_df.t_f),1)
     y_vt = model_params.iloc[0,1] + x * model_params.iloc[0,2]
     y_nema = model_params.iloc[1,1] + x * model_params.iloc[1,2]
-    # regr_df = pd.DataFrame([[x,y_vt,y_nema]],columns=['x','y_vt','y_nema'])
+    # regr_df = pd.DataFrame({'x':x, 'VT Fit':y_vt, 'NEMA FIT':y_nema})
+    # regr_df = regr_df.melt()
 
     fig_dem = (px.scatter(filtered_df, x='t_f', y='energy_normalized',color='Location',
                       color_discrete_map={'NEMA': color_scale_dash[1][1], 'VT': color_scale_dash[0][1]},
@@ -163,5 +164,5 @@ def update_chart(selected_dates):
 
 
 if __name__ == "__main__":
-    # app.run_server(debug=True, port=8000)
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8071)
+    # app.run_server(debug=True)
